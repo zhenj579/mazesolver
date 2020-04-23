@@ -40,10 +40,7 @@ namespace solutions
         return false;
     }
 
-    void DFS(MazeNode *curr, MazeNode *last, std::vector<MazeNode> &path)
-    {
 
-    }
 
     void printStack(stack<MazeNode *> &s)
     {
@@ -63,7 +60,6 @@ namespace solutions
     std::vector<MazeNode> solveDFS(Maze &a_maze)
     {
         std::vector<MazeNode> path;
-        // DFS(a_maze.getFirstNode(), a_maze.getLastNode(), path);
         std::stack<MazeNode *> s;
         MazeNode *node = a_maze.getFirstNode();
         s.push(node);
@@ -71,25 +67,24 @@ namespace solutions
         {
             node = s.top();
             node->setVisited(); // if node isn't visited then set it to visited
-            if(node == a_maze.getLastNode())
+            if(node == a_maze.getLastNode()) // if at end, then path has been found
             {
                 break;
             }
 
-            if(!hasUnvisitedNeighbors(node))
+            if(!hasUnvisitedNeighbors(node)) // if at dead end, go back
             {
                 s.pop();
-                node = s.top();
+                continue;
             }
 
-            for(directions::nesw dir = directions::NORTH; dir <= directions::WEST; dir = directions::nesw(dir + 1))
+            for(directions::nesw dir = directions::NORTH; dir < directions::WEST; dir = directions::nesw(dir + 1))
             {
-                if(canTravel(node->getDirectionNode(dir)))
+                if(canTravel(node->getDirectionNode(dir))) // explore neighbors
                 {
                     s.push(node->getDirectionNode(dir));
                 }
             }
-
         }
         printStack(s);
         return path;
