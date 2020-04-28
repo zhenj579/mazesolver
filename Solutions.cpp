@@ -1,4 +1,4 @@
-#include "Maze.cpp"
+#include "Maze.hpp"
 #include <stack>
 #include <queue>
 
@@ -22,7 +22,7 @@ int getNumberOfWalls(MazeNode *a_node)
 
 bool canTravel(MazeNode *a_node)
 {
-    if (a_node == nullptr || a_node->isVisited() || a_node->isWall())
+    if (a_node->isVisited() || a_node->isWall())
     {
         return false;
     }
@@ -39,49 +39,36 @@ bool canTravel(MazeNode *a_node)
         return false;
     }
 
-    void clearDupes(std::vector<MazeNode> &path)
-    {
-        for(int i = 0; i < path.size()-1; i++)
-        {
-            for(int j = i+1; j < path.size(); j++)
-            {
-                if(path[i].getStrPos() == path[j].getStrPos())
-                {
-                    path.erase(path.begin()+j);
-                }
-            }
-        }
-    }
-
-
     std::vector<MazeNode> solveDFS(Maze &a_maze)
     {
         std::vector<MazeNode> path;
-        std::stack<MazeNode *> s;
         MazeNode *node = a_maze.getFirstNode();
-        s.push(node);
-        while(node != a_maze.getLastNode())
+        path.push_back(*node);
+        while(node != a_maze.getLastNode()) // keep looping until path found
         {
-            node = s.top();
-            node->setVisited(); // if node isn't visited then set it to visited
-
-            if(!hasUnvisitedNeighbors(node)) // if at dead end, go back
+            node = &(path.back()); 
+            node->setVisited();
+            if(canTravel(node->getDirectionNode(directions::NORTH)))
             {
-                s.pop();
+                path.push_back(*(node->getDirectionNode(directions::NORTH)));
+            }
+            else if(canTravel(node->getDirectionNode(directions::EAST)))
+            {
+                path.push_back(*(node->getDirectionNode(directions::EAST)));
+            }
+            else if(canTravel(node->getDirectionNode(directions::SOUTH)))
+            {
+                path.push_back(*(node->getDirectionNode(directions::SOUTH)));
+            }
+            else if(canTravel(node->getDirectionNode(directions::WEST)))
+            {
+                path.push_back(*(node->getDirectionNode(directions::WEST)));
+            }
+            else
+            {
                 path.pop_back();
-                node = s.top();
-            }
-
-            for(directions::nesw dir = directions::NORTH; dir <= directions::WEST; dir = directions::nesw(dir + 1))
-            {
-                if(canTravel(node->getDirectionNode(dir))) // explore neighbors
-                {
-                    s.push(node->getDirectionNode(dir));
-                    path.push_back(*node);
-                }
-            }
+            }                
         }
-        clearDupes(path); // remove other valid paths, just leave one.
         return path;
     }
 
@@ -125,52 +112,19 @@ std::vector<MazeNode> solveDEF(Maze &a_maze)
 std::vector<MazeNode> solveCustom(Maze &a_maze)
 {
     std::vector<MazeNode> t;
-    // std::queue<MazeNode *> q;
-    // MazeNode *node = a_maze.getFirstNode();
-    // q.push(node);
-    // while(!q.empty())
-    // {
-    //     node = q.front();
-
-    //     q.pop();
-
-    //     node->setVisited();
-
-    //     t.push_back(*node);
-
-    //     if(node == a_maze.getLastNode())
-    //     {
-    //         break;
-    //     }
-
-    //     if(!hasUnvisitedNeighbors(node))
-    //     {
-    //         q.pop();
-    //         t.pop_back();
-    //         node = q.front();
-    //     }
-
-    //     for(directions::nesw dir = directions::NORTH; dir <= directions::WEST; dir = directions::nesw(dir + 1))
-    //     {
-    //         if(canTravel(node->getDirectionNode(dir))) // explore neighbors
-    //         {
-    //             q.push(node->getDirectionNode(dir));
-    //         }
-    //     }
-    // }
-    // clearDupes(t);
+   
     return t;
 }
 } // namespace solutions
 
-// int main()
-// {
-//     Maze m{"data/maze_1.csv"};
-//     // solutions::solveCustom(m);
-//     for(auto it : solutions::solveDFS(m))
-//     {
-//         cout<<it.getStrPos()<<endl;
-//     }
-//     return 0;
+int main()
+{
+    Maze m{"data/maze_1.csv"};
+    // solutions::solveDFS(m);
+    for(auto it : solutions::solveDFS(m))
+    {
+        cout<<it.getStrPos()<<endl;
+    }
+    return 0;
 
-// }
+}
