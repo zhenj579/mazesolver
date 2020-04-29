@@ -1,6 +1,7 @@
 #include "Maze.hpp"
 #include <stack>
 #include <queue>
+#include <list>
 
 using namespace std;
 
@@ -29,74 +30,71 @@ bool canTravel(MazeNode *a_node)
     return true;
 }
 
-    bool hasUnvisitedNeighbors(MazeNode *node)
-    {
-        for(directions::nesw dir = directions::NORTH; dir <= directions::WEST; dir = directions::nesw(dir + 1))
-        {
-            if(node != nullptr && canTravel(node->getDirectionNode(dir)))
-                return true;
-        }
-        return false;
-    }
 
     std::vector<MazeNode> solveDFS(Maze &a_maze)
     {
         std::vector<MazeNode> path;
-        MazeNode *node = a_maze.getFirstNode();
-        path.push_back(*node);
-        while(node != a_maze.getLastNode()) // keep looping until path found
+        MazeNode node = *(a_maze.getFirstNode());
+        path.push_back(node);
+        while(!path.empty())
         {
-            node = &(path.back()); 
-            node->setVisited();
-            if(canTravel(node->getDirectionNode(directions::NORTH)))
+            node = path.back();
+
+            if(node.getStrPos() == a_maze.getLastNode()->getStrPos())
             {
-                path.push_back(*(node->getDirectionNode(directions::NORTH)));
+                break;
             }
-            else if(canTravel(node->getDirectionNode(directions::EAST)))
-            {
-                path.push_back(*(node->getDirectionNode(directions::EAST)));
-            }
-            else if(canTravel(node->getDirectionNode(directions::SOUTH)))
-            {
-                path.push_back(*(node->getDirectionNode(directions::SOUTH)));
-            }
-            else if(canTravel(node->getDirectionNode(directions::WEST)))
-            {
-                path.push_back(*(node->getDirectionNode(directions::WEST)));
-            }
-            else
+            if(!canTravel(&node))
             {
                 path.pop_back();
-            }                
+                continue;
+            }
+            node.setVisited();
+            if(canTravel(node.getDirectionNode(directions::NORTH)))
+            {
+                path.push_back(*(node.getDirectionNode(directions::NORTH)));
+            }
+            else if(canTravel(node.getDirectionNode(directions::EAST)))
+            {
+                path.push_back(*(node.getDirectionNode(directions::EAST)));
+            }
+            else if(canTravel(node.getDirectionNode(directions::SOUTH)))
+            {
+                path.push_back(*(node.getDirectionNode(directions::SOUTH)));
+            }
+            else if(canTravel(node.getDirectionNode(directions::WEST)))
+            {
+                path.push_back(*(node.getDirectionNode(directions::WEST)));
+            }
         }
         return path;
     }
 
 std::vector<MazeNode> solveBFS(Maze &a_maze)
 {
-    std::vector<MazeNode> path;
-    // std::queue<MazeNode *> q;
-    // MazeNode *node = a_maze.getFirstNode();
-    // q.push(node);
-    // while(node != a_maze.getLastNode())
-    // {
-    //     node = q.front();
-
-    //     cout<<node->getStrPos()<<endl;
-
-    //     if(!hasUnvisitedNeighbors(node))
-    //     {
-    //         q.pop();
-    //     }
-    //     for(directions::nesw dir = directions::NORTH; dir <= directions::WEST; dir = directions::nesw(dir + 1))
-    //     {
-    //         if(canTravel(node->getDirectionNode(dir))) // explore neighbors
-    //         {
-    //             q.push(node->getDirectionNode(dir));
-    //             path.push_back(*node);
-    //         }
-    //     }
-    // }
+    std::list<MazeNode> l;
+    MazeNode *node = a_maze.getFirstNode();
+    l.push_back(*node);
+    while(node != a_maze.getLastNode())
+    {
+        node = &(l.front());
+        if(canTravel(node))
+        {
+            node->setVisited();
+            for(directions::nesw dir = directions::NORTH; dir <= directions::WEST; dir = directions::nesw(dir + 1))
+            {
+                if(canTravel(node->getDirectionNode(dir)))
+                {
+                    l.push_back(*(node->getDirectionNode(dir)));
+                }
+            }
+        }
+        else
+        {
+            l.pop_front();
+        }
+    }
+    std::vector<MazeNode> path(l.begin(), l.end());
     return path;
 }
 
@@ -120,11 +118,11 @@ std::vector<MazeNode> solveCustom(Maze &a_maze)
 int main()
 {
     Maze m{"data/maze_1.csv"};
-    // solutions::solveDFS(m);
-    for(auto it : solutions::solveDFS(m))
-    {
-        cout<<it.getStrPos()<<endl;
-    }
+    solutions::solveDFS(m);
+    // for(auto it : solutions::solveDFS(m))
+    // {
+        // cout<<it.getStrPos()<<endl;
+    // }
     return 0;
 
 }
