@@ -16,7 +16,7 @@ int getNumberOfWalls(MazeNode *a_node)
     {
         if (a_node->getDirectionNode(dir) == nullptr || a_node->getDirectionNode(dir)->isWall() || a_node->getDirectionNode(dir)->isVisited())
         {
-            std::cout<<a_node->getDirectionNode(dir)->getStrPos()<<std::endl;
+            // std::cout<<a_node->getDirectionNode(dir)->getStrPos()<<std::endl;
             wall_counter++;
         }
     }
@@ -147,43 +147,33 @@ std::vector<MazeNode> solveDEF(Maze &a_maze)
     std::stack<MazeNode *> deadEnds;
     for(auto &it : a_maze.getNodes())
     {
-        // if(!it.isWall() && getNumberOfWalls(&it) >= 3 && it.getStrPos() != a_maze.getLastNode()->getStrPos() && it.getStrPos() != a_maze.getFirstNode()->getStrPos())
-        // {
-        //     it.setVisited();
-        //     deadEnds.push(&it);
-        // }
-        if(it.getStrPos() == "(15,2)") 
+        if(!it.isWall() && getNumberOfWalls(&it) >= 3 && it.getStrPos() != a_maze.getLastNode()->getStrPos() && it.getStrPos() != a_maze.getFirstNode()->getStrPos())
         {
-            it.setVisited();
+            it.setVisited(); // find the dead ends and mark them as visited
             deadEnds.push(&it);
         }
     }
-    MazeNode *node = deadEnds.top();
+    MazeNode *node = deadEnds.top(); 
 
-    std::cout<<node->isVisited()<<std::endl;
+    while(!deadEnds.empty())
+    {
+        node = deadEnds.top(); //process the dead ends
 
-    getNumberOfWalls(node->getDirectionNode(directions::SOUTH));
+        std::cout<<node->getStrPos()<<std::endl;
 
-    // std::cout<<node->isVisited()<<std::endl;
+        deadEnds.pop();
 
-    // std::cout<<node->getStrPos()<<std::endl;
+        for(directions::nesw dir = directions::NORTH; dir <= directions::WEST; dir = directions::nesw(dir+1))
+        {
+            if(canTravel(node->getDirectionNode(dir)) && getNumberOfWalls(node->getDirectionNode(dir)) >= 3)
+            {
+                node->getDirectionNode(dir)->setVisited();
+                deadEnds.push(node->getDirectionNode(dir));
+            }
+        }
 
-    // std::cout<<node->getDirectionNode(directions::SOUTH)->getStrPos()<<std::endl;
 
-    // node->getDirectionNode(directions::SOUTH)->setVisited();
-    // node->getDirectionNode(directions::SOUTH)->getDirectionNode(directions::SOUTH)->setVisited();
-
-    // std::cout<<getNumberOfWalls(node->getDirectionNode(directions::SOUTH))<<std::endl;
-
-    // while(!deadEnds.empty())
-    // {
-    //     node = deadEnds.top();
-
-    //     std::cout<<node->getStrPos()<<std::endl;
-
-    //     deadEnds.pop();
-
-    // }
+    }
     // MazeNode *node;
     // while(!deadEnds.empty())
     // {
@@ -206,11 +196,11 @@ std::vector<MazeNode> solveCustom(Maze &a_maze)
 int main()
 {
     Maze m{"data/maze_1.csv"};
-    solutions::solveDEF(m);
-    // for(auto it : solutions::solveDEF(m))
-    // {
-        // cout<<it.getStrPos()<<endl;
-    // }
+    // solutions::solveDEF(m);
+    for(auto it : solutions::solveDEF(m))
+    {
+        cout<<it.getStrPos()<<endl;
+    }
     return 0;
 
 }
