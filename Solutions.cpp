@@ -185,6 +185,6 @@ std::vector<MazeNode> solveDEF(Maze &a_maze)
 
 std::vector<MazeNode> solveCustom(Maze &a_maze)
 {
-    return solveDEF(a_maze);
+    return solveBFS(a_maze);
 }
 } // namespace solutions
